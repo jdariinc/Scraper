@@ -1,0 +1,80 @@
+﻿<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<style>
+    .wordcountTable, th,td {
+        text-align:left;
+        border:solid;
+    }
+</style>
+
+<form id="form1">
+    <div class="page">
+        <div class="header">
+            <div class="title">
+                <h1>
+                    Display the top 10 occurring words and their count ...
+                </h1>
+            </div>
+        </div>
+        <div class="main">
+            <div>
+                <label>Enter url Address</label>
+                <input id="url" type="text" class="addressBox" />
+                <input id="Scrape" type="button" value="Count" />
+            </div>
+            <br />
+            <table id="wordcountTable" class="wordcountTable">
+            </table>
+            <div style="margin-left: auto; margin-right: auto; width: 120px; display: none" id="Loader">
+                <img src="/ProgressBar/ajax-loader.gif" />
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+    <div class="footer">
+    </div>
+    <script>
+
+        $(function () {
+            $("#Scrape").click(function () {
+                $('#Loader').show();
+                $('.thumb').empty();
+                $('#wordcountTable').empty()
+                $.ajax({
+                    type: "POST",
+                    url: "/WordCount/SubmitInformation",
+                    data: '{url: "' + $("#url").val() + '" }',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        $('#Loader').hide();
+
+                        var count = 1;
+                        $.each(response, function (index, value) {
+                            if (count == 1)
+                            {
+                                $("#wordcountTable").append("<tr><th></th><th>Word</th><th>Count</th></tr><tr><td>" + count + "</td>" + "<td>" + index + "</td>" + "<td>" + value + "</td></tr>")
+                                
+                            }
+                            else
+                            {
+                                $("#wordcountTable").append("<tr><td>" + count + "</td>" + "<td>" + index + "</td>" + "<td>" + value + "</td></tr>")
+                            }
+                            
+                            count++;
+                        });
+                    },
+                    failure: function (response) {
+                        $('#Loader').hide();
+                        alert(response.responseText);
+                    },
+                    error: function (response) {
+                        $('#Loader').hide();
+                        alert(response.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+</form>

@@ -1,0 +1,113 @@
+﻿<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<link href="~/css/style.css" rel="stylesheet" />
+<link href="~/css/jcarousel.ajax.css" rel="stylesheet" />
+
+<script src="~/scripts/jquery.jcarousel.js"></script>
+
+<form id="form1">
+    <div class="page">
+        <div class="header">
+            <div class="title">
+                <h1>
+                    Image Scraper
+                </h1>
+            </div>
+        </div>
+        <div class="main">
+            <div>
+                <label>Enter url Address</label>
+                <input id="url" type="text" class="addressBox" />
+                <input id="Scrape" type="button" value="Scrap" />
+            </div>
+            <br />
+            <ul class="thumb"></ul>
+            <div style="margin-left: auto; margin-right: auto; width: 120px; display: none" id="Loader">
+                <img src="/ProgressBar/ajax-loader.gif" />
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+
+        <div id="jcarousel-wrapper1" class="jcarousel-wrapper" data-jcarouselcontrol="true">
+            <div class="jcarousel" data-jcarousel="true">
+                <ul id="jcarouselUL" style="left: 0px; top: 0px;"></ul>
+            </div>
+            <a href="#" class="jcarousel-control-prev" data-jcarouselcontrol="true">‹</a>
+            <a href="#" class="jcarousel-control-next inactive" data-jcarouselcontrol="true">›</a>
+        </div>
+
+    </div>
+    <div class="footer">
+    </div>
+    <script>
+        $(document).ready(function () {
+            var $jq1 = jQuery.noConflict(true);
+
+            var jcarousel = $('.jcarousel').jcarousel();
+
+            $('.jcarousel-control-prev')
+                .on('jcarouselcontrol:active', function () {
+                    $(this).removeClass('inactive');
+                })
+                .on('jcarouselcontrol:inactive', function () {
+                    $(this).addClass('inactive');
+                })
+                .jcarouselControl({
+                    target: '-=1'
+                });
+
+            $('.jcarousel-control-next')
+                .on('jcarouselcontrol:active', function () {
+                    $(this).removeClass('inactive');
+                })
+                .on('jcarouselcontrol:inactive', function () {
+                    $(this).addClass('inactive');
+                })
+                .jcarouselControl({
+                    target: '+=1'
+                });
+
+            $('#jcarousel-wrapper1').hide();          
+            
+            $("#Scrape").click(function () {
+                $('#jcarousel-wrapper1').show();
+                $('#Loader').show();
+                $('.thumb').empty();
+                $('#jcarouselUL').empty();
+
+                $.ajax({
+                    type: "POST",
+                    url: "/ImageScraper/SubmitInformation",
+                    data: '{url: "' + $("#url").val() + '" }',
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (response) {
+                        var html = '<ul>';
+                        html += response.ImageData;
+                        html += '</ul>';
+
+                        //alert(html);
+
+                        // Append items
+                        jcarousel.html(html);
+
+                        jcarousel.jcarousel('reload');
+
+                        $('#Loader').hide();
+                    },
+                    failure: function (response) {
+                        $('#jcarousel-wrapper1').hide();
+                        $('#Loader').hide();
+                        alert(response.responseText);
+                    },
+                    error: function (response) {
+                        $('#jcarousel-wrapper1').hide();
+                        $('#Loader').hide();
+                        alert(response.responseText + " valid url example:  http://www.cnn.com");
+                    }
+                });
+            });
+        });
+    </script>
+</form>
